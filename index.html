@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Packet Path — an interactive classroom simulation for learning IP addresses, DNS, routers, NAT, ports, firewalls, and Bitcoin networking."
+    />
+    <title>Packet Path — How Computers Find Each Other</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <svg class="svg-sprite" aria-hidden="true">
+      <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="19" r="3"/><circle cx="18" cy="5" r="3"/><path d="M9 19h1a4 4 0 0 0 4-4V9a4 4 0 0 1 4-4"/></symbol>
+      <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></symbol>
+      <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14 0 18M12 3c-3 3.5-3 14 0 18"/></symbol>
+      <symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="6" rx="2"/><rect x="3" y="14" width="18" height="6" rx="2"/><path d="M7 7h.01M7 17h.01M11 7h6M11 17h6"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 7.8 7.5 9.5 4.4-1.7 7.5-4.9 7.5-9.5V6L12 3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+      <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5v-16ZM20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5a2.5 2.5 0 0 1 2.5 2.5v-16Z"/></symbol>
+      <symbol id="i-terminal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7V5Z"/></symbol>
+      <symbol id="i-reset" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M18.5 9a7 7 0 0 0-12-2L4 12M5.5 15a7 7 0 0 0 12 2l2.5-5"/></symbol>
+      <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="12" rx="2"/><path d="M2 19h20"/></symbol>
+      <symbol id="i-router" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="8" rx="2"/><path d="M8 15h.01M12 15h.01M16 15h2M12 11V7M9 8.5a4 4 0 0 1 6 0M7 6a7 7 0 0 1 10 0"/></symbol>
+      <symbol id="i-dns" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/><path d="m16 14 2 2 3-4"/></symbol>
+      <symbol id="i-bitcoin" viewBox="0 0 24 24"><path d="M8 5h7.2a3.3 3.3 0 0 1 0 6.5H8m0 0h8a3.7 3.7 0 0 1 0 7.5H8M11 3v18M15 3v2M15 19v2M6 5h3M6 19h3"/></symbol>
+      <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M8.5 15.5A7 7 0 1 1 15.5 15.5c-.8.6-1.2 1.4-1.3 2.5h-4.4c-.1-1.1-.5-1.9-1.3-2.5Z"/></symbol>
+    </svg>
+
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar">
+        <a class="brand" href="#" aria-label="Packet Path home">
+          <span class="brand-mark"><svg><use href="#i-route"></use></svg></span>
+          <span><strong>Packet</strong> Path</span>
+        </a>
+
+        <div class="course-label">COURSE JOURNEY</div>
+        <nav class="lesson-nav" aria-label="Lesson sections">
+          <button class="nav-item active" data-section="lab">
+            <span class="nav-number">01</span>
+            <span><strong>Send a packet</strong><small>Interactive lab</small></span>
+            <svg><use href="#i-arrow"></use></svg>
+          </button>
+          <button class="nav-item" data-section="addresses">
+            <span class="nav-number">02</span>
+            <span><strong>Know the address</strong><small>Public, private, local</small></span>
+            <svg><use href="#i-arrow"></use></svg>
+          </button>
+          <button class="nav-item" data-section="services">
+            <span class="nav-number">03</span>
+            <span><strong>Meet the helpers</strong><small>DNS, DHCP, NAT</small></span>
+            <svg><use href="#i-arrow"></use></svg>
+          </button>
+          <button class="nav-item" data-section="terminal">
+            <span class="nav-number">04</span>
+            <span><strong>Try the commands</strong><small>Safe practice terminal</small></span>
+            <svg><use href="#i-arrow"></use></svg>
+          </button>
+          <button class="nav-item" data-section="quiz">
+            <span class="nav-number">05</span>
+            <span><strong>Prove your skills</strong><small>6 question challenge</small></span>
+            <svg><use href="#i-arrow"></use></svg>
+          </button>
+        </nav>
+
+        <div class="sidebar-progress">
+          <div class="progress-copy"><span>Lesson progress</span><strong id="progressLabel">0%</strong></div>
+          <div class="progress-track"><span id="progressBar"></span></div>
+          <small id="progressHint">Start by sending your first packet.</small>
+        </div>
+      </aside>
+
+      <div class="page-wrap">
+        <header class="topbar">
+          <button class="icon-button menu-button" id="menuButton" aria-label="Open navigation"><span></span><span></span><span></span></button>
+          <div class="breadcrumb"><span>NETWORK FUNDAMENTALS</span><svg><use href="#i-arrow"></use></svg><strong id="breadcrumbCurrent">INTERACTIVE LAB</strong></div>
+          <div class="top-actions">
+            <span class="lesson-time">● &nbsp; 15 MIN LESSON</span>
+            <button class="icon-button" id="soundToggle" aria-label="Toggle sound" title="Toggle sound">
+              <svg viewBox="0 0 24 24"><path d="M5 10v4h3l4 3V7l-4 3H5ZM16 9c1.3 1.7 1.3 4.3 0 6M19 6c3.2 3.4 3.2 8.6 0 12"/></svg>
+            </button>
+          </div>
+        </header>
+
+        <main id="mainContent">
+          <section class="content-section active" id="section-lab" data-title="INTERACTIVE LAB">
+            <div class="lesson-heading">
+              <div>
+                <div class="eyebrow"><span>LESSON 01</span><i></i> INTERACTIVE SIMULATION</div>
+                <h1>How do computers<br /><em>find each other?</em></h1>
+                <p>Build a connection, send a packet, and watch every decision it meets along the way.</p>
+              </div>
+              <div class="learning-goal">
+                <svg><use href="#i-bulb"></use></svg>
+                <div><span>YOUR MISSION</span><strong>Get a packet from Alice’s laptop to the Bitcoin node.</strong></div>
+              </div>
+            </div>
+
+            <div class="simulator-card">
+              <div class="sim-toolbar">
+                <div class="sim-title"><span class="live-dot"></span><strong>CLASSROOM NETWORK</strong><small>Live simulation</small></div>
+                <div class="sim-stats">
+                  <span><i class="status-online"></i> Network online</span>
+                  <span>Public IP&nbsp; <strong>203.0.113.50</strong></span>
+                </div>
+              </div>
+
+              <div class="sim-body">
+                <div class="network-stage" id="networkStage">
+                  <div class="zone-label local-zone-label">PRIVATE NETWORK · 192.168.1.0/24</div>
+                  <div class="internet-cloud">
+                    <svg><use href="#i-globe"></use></svg>
+                    <span>THE INTERNET</span>
+                    <small>many connected networks</small>
+                  </div>
+
+                  <div class="connection line-internet"><span class="hop-label">public route</span></div>
+                  <div class="connection line-laptop"><span class="hop-label">Wi-Fi</span></div>
+                  <div class="connection line-node"><span class="hop-label">LAN</span></div>
+
+                  <div class="device router-device" data-device="router">
+                    <div class="device-icon"><svg><use href="#i-router"></use></svg></div>
+                    <div class="device-copy"><strong>Classroom router</strong><span>192.168.1.1</span><small>NAT + DHCP + Firewall</small></div>
+                    <button class="info-hotspot" aria-label="About the router" data-tip="router">i</button>
+                  </div>
+
+                  <div class="device laptop-device active-device" data-device="laptop">
+                    <div class="device-icon"><svg><use href="#i-laptop"></use></svg></div>
+                    <div class="device-copy"><strong>Alice’s laptop</strong><span>192.168.1.25</span><small>Your starting point</small></div>
+                    <div class="you-badge">YOU</div>
+                  </div>
+
+                  <div class="device node-device" data-device="node">
+                    <div class="device-icon bitcoin-icon"><svg><use href="#i-bitcoin"></use></svg></div>
+                    <div class="device-copy"><strong>Bitcoin node</strong><span>192.168.1.30</span><small>Ports 8333 · 8332</small></div>
+                    <button class="info-hotspot" aria-label="About the Bitcoin node" data-tip="node">i</button>
+                  </div>
+
+                  <div class="packet" id="packet" aria-hidden="true"><span></span></div>
+                  <div class="packet-label" id="packetLabel">DATA PACKET</div>
+
+                  <div class="stage-callout" id="stageCallout" aria-live="polite">
+                    <span>READY?</span>
+                    <strong>Choose a destination below.</strong>
+                  </div>
+                </div>
+
+                <aside class="control-panel">
+                  <div class="control-step">
+                    <span class="step-index">1</span>
+                    <div><strong>Where should it go?</strong><small>Choose an address</small></div>
+                  </div>
+                  <div class="choice-stack" id="destinationChoices">
+                    <button class="choice-card selected" data-destination="lan">
+                      <svg><use href="#i-home"></use></svg>
+                      <span><strong>Classroom node</strong><small>192.168.1.30</small></span>
+                      <i></i>
+                    </button>
+                    <button class="choice-card" data-destination="localhost">
+                      <svg><use href="#i-laptop"></use></svg>
+                      <span><strong>This computer</strong><small>127.0.0.1</small></span>
+                      <i></i>
+                    </button>
+                    <button class="choice-card" data-destination="internet">
+                      <svg><use href="#i-globe"></use></svg>
+                      <span><strong>bitcoin.org</strong><small>Ask DNS first</small></span>
+                      <i></i>
+                    </button>
+                  </div>
+
+                  <div class="control-step second-step">
+                    <span class="step-index">2</span>
+                    <div><strong>Which service?</strong><small>Choose a port</small></div>
+                  </div>
+                  <div class="port-toggle" id="portChoices">
+                    <button class="selected" data-port="8333"><strong>8333</strong><small>Bitcoin P2P</small></button>
+                    <button data-port="8332"><strong>8332</strong><small>Bitcoin RPC</small></button>
+                    <button data-port="443"><strong>443</strong><small>HTTPS</small></button>
+                  </div>
+
+                  <button class="send-button" id="sendPacket">
+                    <svg><use href="#i-play"></use></svg>
+                    <span>SEND PACKET</span>
+                  </button>
+                  <p class="control-note"><svg><use href="#i-info"></use></svg>Nothing leaves your browser. This is a safe simulation.</p>
+                </aside>
+              </div>
+
+              <div class="event-tray" id="eventTray">
+                <div class="event-tray-head">
+                  <div><span>PACKET JOURNEY</span><strong id="journeyTitle">Waiting to begin</strong></div>
+                  <button id="resetSim"><svg><use href="#i-reset"></use></svg> Reset</button>
+                </div>
+                <div class="journey-steps" id="journeySteps">
+                  <div class="journey-step"><span>1</span><div><strong>Address</strong><small>Where is it going?</small></div></div>
+                  <div class="journey-line"></div>
+                  <div class="journey-step"><span>2</span><div><strong>Route</strong><small>Which path?</small></div></div>
+                  <div class="journey-line"></div>
+                  <div class="journey-step"><span>3</span><div><strong>Firewall</strong><small>Is it allowed?</small></div></div>
+                  <div class="journey-line"></div>
+                  <div class="journey-step"><span>4</span><div><strong>Service</strong><small>Which application?</small></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="analogy-strip">
+              <div><span class="mini-icon"><svg><use href="#i-home"></use></svg></span><p><strong>IP address</strong><small>Building address</small></p></div>
+              <i></i>
+              <div><span class="mini-icon">#</span><p><strong>Port</strong><small>Room number</small></p></div>
+              <i></i>
+              <div><span class="mini-icon"><svg><use href="#i-router"></use></svg></span><p><strong>Router</strong><small>Post office</small></p></div>
+              <i></i>
+              <div><span class="mini-icon"><svg><use href="#i-shield"></use></svg></span><p><strong>Firewall</strong><small>Security guard</small></p></div>
+            </div>
+
+            <button class="continue-button" data-next="addresses">NEXT: KNOW THE ADDRESS <svg><use href="#i-arrow"></use></svg></button>
+          </section>
+
+          <section class="content-section" id="section-addresses" data-title="KNOW THE ADDRESS">
+            <div class="section-intro">
+              <div class="eyebrow"><span>LESSON 02</span><i></i> IP ADDRESSES</div>
+              <h2>One device, <em>three ways</em> to find it.</h2>
+              <p>The right address depends on where you are standing.</p>
+            </div>
+
+            <div class="address-scenario">
+              <div class="perspective-visual">
+                <div class="perspective-ring public-ring"><span>THE INTERNET</span></div>
+                <div class="perspective-ring private-ring"><span>YOUR WI-FI</span></div>
+                <div class="perspective-ring local-ring"><span>THIS LAPTOP</span></div>
+                <div class="perspective-device"><svg><use href="#i-laptop"></use></svg></div>
+              </div>
+              <div class="address-cards">
+                <button class="address-card selected" data-address="local">
+                  <span class="address-tag tag-local">LOCALHOST</span>
+                  <strong>127.0.0.1</strong>
+                  <p>“This computer.” Traffic never leaves the laptop.</p>
+                  <small><svg><use href="#i-check"></use></svg> Use for an app on the same machine</small>
+                </button>
+                <button class="address-card" data-address="private">
+                  <span class="address-tag tag-private">PRIVATE IP</span>
+                  <strong>192.168.1.25</strong>
+                  <p>Finds Alice’s laptop inside this local network.</p>
+                  <small><svg><use href="#i-check"></use></svg> Use from another classroom device</small>
+                </button>
+                <button class="address-card" data-address="public">
+                  <span class="address-tag tag-public">PUBLIC IP</span>
+                  <strong>203.0.113.50</strong>
+                  <p>Identifies the whole network to the outside world.</p>
+                  <small><svg><use href="#i-check"></use></svg> Shared by devices through NAT</small>
+                </button>
+              </div>
+            </div>
+
+            <div class="explain-panel" id="addressExplain">
+              <span class="panel-number">01</span>
+              <div><h3>Localhost stays at home</h3><p><strong>127.0.0.1</strong> always means the device you are currently using. Pinging it tests your computer’s network software—not your Wi-Fi or internet connection.</p></div>
+              <code>ping 127.0.0.1</code>
+            </div>
+
+            <div class="range-card">
+              <div><span class="section-kicker">SPOT A PRIVATE ADDRESS</span><h3>Three reserved neighborhoods</h3><p>If an address begins with one of these ranges, it stays inside a private network.</p></div>
+              <div class="range-list">
+                <span><strong>10</strong>.0.0.0 – <strong>10</strong>.255.255.255 <small>Large networks</small></span>
+                <span><strong>172.16</strong>.0.0 – <strong>172.31</strong>.255.255 <small>Organizations & cloud</small></span>
+                <span><strong>192.168</strong>.0.0 – <strong>192.168</strong>.255.255 <small>Homes & classrooms</small></span>
+              </div>
+            </div>
+            <button class="continue-button" data-next="services">NEXT: MEET THE HELPERS <svg><use href="#i-arrow"></use></svg></button>
+          </section>
+
+          <section class="content-section" id="section-services" data-title="MEET THE HELPERS">
+            <div class="section-intro">
+              <div class="eyebrow"><span>LESSON 03</span><i></i> NETWORK SERVICES</div>
+              <h2>Meet the team behind <em>every connection.</em></h2>
+              <p>Tap each helper to see the job it performs.</p>
+            </div>
+
+            <div class="helper-layout">
+              <div class="helper-tabs" role="tablist">
+                <button class="helper-tab selected" data-helper="dhcp"><span><svg><use href="#i-router"></use></svg></span><div><strong>DHCP</strong><small>The welcome desk</small></div><svg><use href="#i-arrow"></use></svg></button>
+                <button class="helper-tab" data-helper="dns"><span><svg><use href="#i-dns"></use></svg></span><div><strong>DNS</strong><small>The contact list</small></div><svg><use href="#i-arrow"></use></svg></button>
+                <button class="helper-tab" data-helper="nat"><span><svg><use href="#i-route"></use></svg></span><div><strong>NAT</strong><small>The mailroom clerk</small></div><svg><use href="#i-arrow"></use></svg></button>
+                <button class="helper-tab" data-helper="firewall"><span><svg><use href="#i-shield"></use></svg></span><div><strong>Firewall</strong><small>The security guard</small></div><svg><use href="#i-arrow"></use></svg></button>
+                <button class="helper-tab" data-helper="ports"><span>#</span><div><strong>Ports</strong><small>The room numbers</small></div><svg><use href="#i-arrow"></use></svg></button>
+              </div>
+              <div class="helper-detail" id="helperDetail">
+                <div class="helper-illustration dhcp-visual">
+                  <div class="router-orb"><svg><use href="#i-router"></use></svg><span>ROUTER</span></div>
+                  <div class="lease lease-one"><span>IP</span><strong>192.168.1.25</strong><small>Alice’s laptop</small></div>
+                  <div class="lease lease-two"><span>GW</span><strong>192.168.1.1</strong><small>Default gateway</small></div>
+                  <div class="lease lease-three"><span>DNS</span><strong>1.1.1.1</strong><small>Name server</small></div>
+                </div>
+                <div class="helper-copy"><span class="helper-count">HELPER 1 OF 5</span><h3>DHCP says, “Welcome—here are your settings.”</h3><p>When your device joins Wi-Fi, DHCP automatically supplies an IP address, subnet mask, default gateway, and DNS server.</p><div class="remember"><svg><use href="#i-bulb"></use></svg><p><strong>Remember</strong>You usually don’t choose your phone’s IP address. DHCP does.</p></div></div>
+              </div>
+            </div>
+
+            <div class="port-table-card">
+              <div><span class="section-kicker">PORT QUICK REFERENCE</span><h3>An IP finds the computer. A port finds the app.</h3></div>
+              <div class="port-grid">
+                <div><strong>80</strong><span>HTTP<small>Website</small></span></div>
+                <div><strong>443</strong><span>HTTPS<small>Secure website</small></span></div>
+                <div><strong>22</strong><span>SSH<small>Remote shell</small></span></div>
+                <div class="bitcoin-port"><strong>8333</strong><span>Bitcoin P2P<small>Node peers</small></span></div>
+                <div class="danger-port"><strong>8332</strong><span>Bitcoin RPC<small>Keep private</small></span></div>
+              </div>
+            </div>
+            <button class="continue-button" data-next="terminal">NEXT: TRY THE COMMANDS <svg><use href="#i-arrow"></use></svg></button>
+          </section>
+
+          <section class="content-section" id="section-terminal" data-title="COMMAND LAB">
+            <div class="section-intro">
+              <div class="eyebrow"><span>LESSON 04</span><i></i> HANDS-ON PRACTICE</div>
+              <h2>Diagnose the network, <em>one test at a time.</em></h2>
+              <p>This practice terminal behaves like a real command line, but it is completely simulated.</p>
+            </div>
+
+            <div class="terminal-lab">
+              <aside class="mission-list">
+                <span class="section-kicker">YOUR CHECKLIST</span>
+                <button class="mission active" data-command="ipconfig"><span>1</span><div><strong>Find your address</strong><small>ipconfig</small></div><i></i></button>
+                <button class="mission" data-command="ping 127.0.0.1"><span>2</span><div><strong>Test localhost</strong><small>ping 127.0.0.1</small></div><i></i></button>
+                <button class="mission" data-command="ping 192.168.1.1"><span>3</span><div><strong>Test the router</strong><small>ping 192.168.1.1</small></div><i></i></button>
+                <button class="mission" data-command="ping 1.1.1.1"><span>4</span><div><strong>Test the internet</strong><small>ping 1.1.1.1</small></div><i></i></button>
+                <button class="mission" data-command="nslookup example.com"><span>5</span><div><strong>Test DNS</strong><small>nslookup example.com</small></div><i></i></button>
+                <button class="mission" data-command="traceroute example.com"><span>6</span><div><strong>Observe the route</strong><small>traceroute example.com</small></div><i></i></button>
+              </aside>
+              <div class="terminal-wrap">
+                <div class="terminal-bar"><span><i></i><i></i><i></i></span><strong>student@packet-path: ~</strong><small>SIMULATED</small></div>
+                <div class="terminal-screen" id="terminalScreen">
+                  <p class="terminal-welcome">Packet Path classroom terminal<br />Type <b>help</b> or choose a mission from the left.</p>
+                  <div id="terminalHistory"></div>
+                  <form id="terminalForm" autocomplete="off">
+                    <label for="terminalInput">student@laptop:~$</label>
+                    <input id="terminalInput" spellcheck="false" aria-label="Terminal command" autofocus />
+                  </form>
+                </div>
+                <div class="terminal-tip" id="terminalTip"><svg><use href="#i-bulb"></use></svg><p><strong>Start here</strong>Run <code>ipconfig</code> to discover Alice’s network settings.</p></div>
+              </div>
+            </div>
+            <button class="continue-button" data-next="quiz">NEXT: PROVE YOUR SKILLS <svg><use href="#i-arrow"></use></svg></button>
+          </section>
+
+          <section class="content-section" id="section-quiz" data-title="FINAL CHALLENGE">
+            <div class="section-intro quiz-intro">
+              <div>
+                <div class="eyebrow"><span>LESSON 05</span><i></i> FINAL CHALLENGE</div>
+                <h2>Can you connect <em>the node?</em></h2>
+                <p>Use what you learned to solve six real networking decisions.</p>
+              </div>
+              <div class="score-ring" id="scoreRing"><strong id="scoreValue">0</strong><span>/ 6</span><small>CORRECT</small></div>
+            </div>
+
+            <div class="scenario-card">
+              <div class="scenario-icon"><svg><use href="#i-bitcoin"></use></svg></div>
+              <div><span>THE SCENARIO</span><p>Alice’s laptop is <strong>192.168.1.25</strong>. Her router is <strong>192.168.1.1</strong> with public IP <strong>203.0.113.50</strong>. Bitcoin Core is running on Alice’s laptop.</p></div>
+            </div>
+
+            <form class="quiz-form" id="quizForm">
+              <div class="quiz-question" data-answer="127.0.0.1">
+                <div class="question-head"><span>01</span><p>Which address should an app on Alice’s laptop use?</p></div>
+                <div class="answer-options"><button type="button" data-value="192.168.1.25">192.168.1.25</button><button type="button" data-value="127.0.0.1">127.0.0.1</button><button type="button" data-value="203.0.113.50">203.0.113.50</button></div>
+                <div class="answer-feedback"></div>
+              </div>
+              <div class="quiz-question" data-answer="192.168.1.25">
+                <div class="question-head"><span>02</span><p>Which address should another student on the same Wi-Fi use?</p></div>
+                <div class="answer-options"><button type="button" data-value="127.0.0.1">127.0.0.1</button><button type="button" data-value="192.168.1.25">192.168.1.25</button><button type="button" data-value="192.168.1.1">192.168.1.1</button></div>
+                <div class="answer-feedback"></div>
+              </div>
+              <div class="quiz-question" data-answer="203.0.113.50">
+                <div class="question-head"><span>03</span><p>Which address represents the network on the public internet?</p></div>
+                <div class="answer-options"><button type="button" data-value="192.168.1.1">192.168.1.1</button><button type="button" data-value="203.0.113.50">203.0.113.50</button><button type="button" data-value="127.0.0.1">127.0.0.1</button></div>
+                <div class="answer-feedback"></div>
+              </div>
+              <div class="quiz-question" data-answer="P2P peers">
+                <div class="question-head"><span>04</span><p>What commonly uses Bitcoin port 8333?</p></div>
+                <div class="answer-options"><button type="button" data-value="P2P peers">P2P peers</button><button type="button" data-value="Private RPC">Private RPC</button><button type="button" data-value="DNS lookups">DNS lookups</button></div>
+                <div class="answer-feedback"></div>
+              </div>
+              <div class="quiz-question" data-answer="NAT">
+                <div class="question-head"><span>05</span><p>What lets several devices share one public IP?</p></div>
+                <div class="answer-options"><button type="button" data-value="DNS">DNS</button><button type="button" data-value="DHCP">DHCP</button><button type="button" data-value="NAT">NAT</button></div>
+                <div class="answer-feedback"></div>
+              </div>
+              <div class="quiz-question" data-answer="Firewall">
+                <div class="question-head"><span>06</span><p>What decides whether a network connection is allowed?</p></div>
+                <div class="answer-options"><button type="button" data-value="Port">Port</button><button type="button" data-value="Firewall">Firewall</button><button type="button" data-value="Packet">Packet</button></div>
+                <div class="answer-feedback"></div>
+              </div>
+              <button type="button" class="check-button" id="checkAnswers" disabled>CHECK MY ANSWERS</button>
+            </form>
+
+            <div class="completion-card" id="completionCard">
+              <span class="completion-burst">✓</span>
+              <div><span>LESSON COMPLETE</span><h3>You can now explain how computers find each other.</h3><p>You connected addresses, routes, services, and security—just like a network engineer.</p></div>
+              <button id="restartLesson"><svg><use href="#i-reset"></use></svg> RESTART</button>
+            </div>
+          </section>
+        </main>
+
+        <footer><span>PACKET PATH · NETWORK FUNDAMENTALS</span><p>Built for curious minds. No real network traffic is generated.</p></footer>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="tooltip-card" id="tooltipCard" role="dialog" aria-live="polite"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
