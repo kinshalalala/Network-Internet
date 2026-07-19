@@ -127,20 +127,37 @@ function resetJourney() {
   $('#stageCallout').className = 'stage-callout';
 }
 
+function placePacket(position) {
+  const packet = $('#packet');
+  const label = $('#packetLabel');
+  packet.style.display = 'grid';
+  label.style.display = 'block';
+  Object.entries(position).forEach(([key, value]) => {
+    packet.style[key] = value;
+    label.style[key] = key === 'left' ? `calc(${value} + 39px)` : value;
+  });
+}
+
 async function animatePacket(points) {
   const packet = $('#packet');
   const label = $('#packetLabel');
-  packet.style.display = 'block';
-  label.style.display = 'block';
+  packet.classList.add('moving');
   for (const point of points) {
-    packet.style.transition = `left ${point.time || 650}ms ease, top ${point.time || 650}ms ease, bottom ${point.time || 650}ms ease`;
+    packet.style.transition = `left ${point.time || 1800}ms cubic-bezier(.4,0,.2,1), top ${point.time || 1800}ms cubic-bezier(.4,0,.2,1)`;
     label.style.transition = packet.style.transition;
     Object.entries(point.pos).forEach(([key, value]) => {
       packet.style[key] = value;
-      label.style[key] = key === 'left' ? `calc(${value} + 28px)` : value;
+      label.style[key] = key === 'left' ? `calc(${value} + 39px)` : value;
     });
-    await wait(point.time || 650);
+    await wait(point.time || 1800);
+    if (point.stop) {
+      const device = $(`.device[data-device="${point.stop}"]`);
+      device?.classList.add('packet-stop');
+      await wait(700);
+      device?.classList.remove('packet-stop');
+    }
   }
+  packet.classList.remove('moving');
 }
 
 async function runSimulation() {
@@ -152,34 +169,44 @@ async function runSimulation() {
   $('#journeyTitle').textContent = 'Inspecting destination…';
 
   const destinationData = {
-    lan: { address: '192.168.1.30', route: 'Local Wi-Fi', final: { left: '80%', bottom: '95px' } },
-    localhost: { address: '127.0.0.1', route: 'Loopback', final: { left: '16%', bottom: '95px' } },
-    internet: { address: 'bitcoin.org → 138.68.248.245', route: 'Via router + NAT', final: { left: '49%', top: '46px' } }
+    lan: { address: '192.168.1.30', route: 'Local Wi-Fi', final: { left: '76%', top: '77%' } },
+    localhost: { address: '127.0.0.1', route: 'Loopback', final: { left: '11%', top: '77%' } },
+    internet: { address: 'bitcoin.org → 138.68.248.245', route: 'Via router + NAT', final: { left: '48.5%', top: '7%' } }
   }[state.destination];
 
   setJourneyStep(0, 'active', state.destination === 'internet' ? 'DNS lookup' : 'Address found', destinationData.address);
   $('#stageCallout').innerHTML = `<span>STEP 1 · ADDRESS</span><strong>${state.destination === 'internet' ? 'DNS translates the name into an IP.' : `Destination: ${destinationData.address}`}</strong>`;
-  await wait(800);
+  await wait(1600);
   setJourneyStep(0, 'done', 'Address found', destinationData.address);
 
   setJourneyStep(1, 'active', 'Route chosen', destinationData.route);
   $('#journeyTitle').textContent = `Sending to ${destinationData.address}:${state.port}`;
+  placePacket({ left: '11%', top: '77%' });
+  $('#stageCallout').innerHTML = '<span>PACKAGE READY</span><strong>Leaving Alice’s laptop…</strong>';
+  softBeep(560, .06);
+  await wait(1400);
   if (state.destination === 'localhost') {
     $('#stageCallout').innerHTML = '<span>STEP 2 · LOOPBACK</span><strong>No router needed. The packet stays here.</strong>';
-    await animatePacket([{ pos: { left: '20%', bottom: '126px' }, time: 450 }, { pos: { left: '16%', bottom: '95px' }, time: 450 }]);
+    await animatePacket([{ pos: { left: '17%', top: '67%' }, time: 1200 }, { pos: destinationData.final, time: 1200, stop: 'laptop' }]);
   } else if (state.destination === 'lan') {
-    $('#stageCallout').innerHTML = '<span>STEP 2 · LOCAL ROUTE</span><strong>The devices share the same local network.</strong>';
-    await animatePacket([{ pos: { left: '48%', bottom: '185px' }, time: 700 }, { pos: destinationData.final, time: 700 }]);
+    $('#stageCallout').innerHTML = '<span>STEP 2 · TO THE ROUTER</span><strong>Alice sends the package to the network.</strong>';
+    await animatePacket([{ pos: { left: '48.5%', top: '46%' }, time: 1800, stop: 'router' }]);
+    $('#stageCallout').innerHTML = '<span>ROUTER CHECK</span><strong>Destination is on this local network. Forward it.</strong>';
+    await wait(1400);
+    await animatePacket([{ pos: destinationData.final, time: 1800, stop: 'node' }]);
   } else {
-    $('#stageCallout').innerHTML = '<span>STEP 2 · DEFAULT GATEWAY</span><strong>The router uses NAT and forwards it outward.</strong>';
-    await animatePacket([{ pos: { left: '49%', bottom: '185px' }, time: 700 }, { pos: destinationData.final, time: 700 }]);
+    $('#stageCallout').innerHTML = '<span>STEP 2 · TO THE ROUTER</span><strong>Alice sends the package to her default gateway.</strong>';
+    await animatePacket([{ pos: { left: '48.5%', top: '46%' }, time: 1800, stop: 'router' }]);
+    $('#stageCallout').innerHTML = '<span>NAT AT THE ROUTER</span><strong>Use the public IP, then forward it to the internet.</strong>';
+    await wait(1400);
+    await animatePacket([{ pos: destinationData.final, time: 1800 }]);
   }
   setJourneyStep(1, 'done', 'Route chosen', destinationData.route);
 
   setJourneyStep(2, 'active', 'Firewall check', 'Reading the rules');
   const rpcBlocked = state.port === '8332' && state.destination !== 'localhost';
   const mismatchBlocked = state.port === '443' && state.destination === 'lan';
-  await wait(750);
+  await wait(1500);
 
   if (rpcBlocked || mismatchBlocked) {
     setJourneyStep(2, 'blocked', 'Blocked', rpcBlocked ? 'RPC is private' : 'No HTTPS service');
@@ -190,7 +217,7 @@ async function runSimulation() {
   } else {
     setJourneyStep(2, 'done', 'Allowed', state.destination === 'localhost' ? 'Local access' : `Port ${state.port} open`);
     setJourneyStep(3, 'active', `Port ${state.port}`, state.port === '8333' ? 'Bitcoin P2P' : state.port === '8332' ? 'Bitcoin RPC' : 'HTTPS');
-    await wait(650);
+    await wait(1200);
     setJourneyStep(3, 'done', 'Delivered', 'Application received it');
     $('#stageCallout').className = 'stage-callout success';
     $('#stageCallout').innerHTML = `<span>PACKET DELIVERED</span><strong>IP found the device. Port ${state.port} found the app.</strong>`;
@@ -283,23 +310,42 @@ const helpers = {
   }
 };
 
+function renderHelper(helperKey) {
+  const data = helpers[helperKey];
+  const detail = $('#helperDetail');
+  const visual = helperKey === 'dhcp'
+    ? `<div class="helper-illustration dhcp-visual">
+        <svg class="helper-links" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <line x1="50" y1="50" x2="24" y2="25"></line>
+          <line x1="50" y1="50" x2="76" y2="25"></line>
+          <line x1="50" y1="50" x2="28" y2="80"></line>
+        </svg>
+        <div class="router-orb"><svg><use href="#i-router"></use></svg><span>ROUTER</span></div>
+        <div class="lease lease-one"><span>IP</span><strong>192.168.1.25</strong><small>Alice’s laptop</small></div>
+        <div class="lease lease-two"><span>GW</span><strong>192.168.1.1</strong><small>Default gateway</small></div>
+        <div class="lease lease-three"><span>DNS</span><strong>1.1.1.1</strong><small>Name server</small></div>
+      </div>`
+    : `<div class="helper-illustration simple-visual">
+        <div class="simple-diagram">
+          <svg><use href="#${data.icon}"></use></svg>
+          <strong>${data.label}</strong>
+          <code>${data.code}</code>
+          <div class="simple-flow"><span>REQUEST</span><i>→</i><span>${helperKey.toUpperCase()}</span><i>→</i><span>RESULT</span></div>
+        </div>
+      </div>`;
+
+  detail.innerHTML = `${visual}
+    <div class="helper-copy"><span class="helper-count">${data.count}</span><h3>${data.title}</h3><p>${data.text}</p><div class="remember"><svg><use href="#i-bulb"></use></svg><p><strong>Remember</strong>${data.remember}</p></div></div>`;
+}
+
 $$('.helper-tab').forEach(tab => tab.addEventListener('click', () => {
   $$('.helper-tab').forEach(item => item.classList.remove('selected'));
   tab.classList.add('selected');
-  const data = helpers[tab.dataset.helper];
-  const detail = $('#helperDetail');
-  detail.innerHTML = `
-    <div class="helper-illustration simple-visual">
-      <div class="simple-diagram">
-        <svg><use href="#${data.icon}"></use></svg>
-        <strong>${data.label}</strong>
-        <code>${data.code}</code>
-        <div class="simple-flow"><span>REQUEST</span><i>→</i><span>${tab.dataset.helper.toUpperCase()}</span><i>→</i><span>RESULT</span></div>
-      </div>
-    </div>
-    <div class="helper-copy"><span class="helper-count">${data.count}</span><h3>${data.title}</h3><p>${data.text}</p><div class="remember"><svg><use href="#i-bulb"></use></svg><p><strong>Remember</strong>${data.remember}</p></div></div>`;
+  renderHelper(tab.dataset.helper);
   softBeep(450, .04);
 }));
+
+renderHelper('dhcp');
 
 const commandData = {
   'help': {
@@ -451,4 +497,6 @@ document.addEventListener('keydown', event => {
   }
 });
 
-updateProgress();
+const initialSection = window.location.hash.slice(1);
+if (document.getElementById(`section-${initialSection}`)) navigate(initialSection);
+else updateProgress();

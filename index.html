@@ -119,6 +119,11 @@
                     <small>many connected networks</small>
                   </div>
 
+                  <svg class="network-links" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                    <line x1="50" y1="25" x2="50" y2="49"></line>
+                    <line x1="50" y1="49" x2="12.5" y2="80"></line>
+                    <line x1="50" y1="49" x2="77.5" y2="80"></line>
+                  </svg>
                   <div class="connection line-internet"><span class="hop-label">public route</span></div>
                   <div class="connection line-laptop"><span class="hop-label">Wi-Fi</span></div>
                   <div class="connection line-node"><span class="hop-label">LAN</span></div>
@@ -141,7 +146,9 @@
                     <button class="info-hotspot" aria-label="About the Bitcoin node" data-tip="node">i</button>
                   </div>
 
-                  <div class="packet" id="packet" aria-hidden="true"><span></span></div>
+                  <div class="packet" id="packet" aria-hidden="true">
+                    <svg><use href="#i-play"></use></svg>
+                  </div>
                   <div class="packet-label" id="packetLabel">DATA PACKET</div>
 
                   <div class="stage-callout" id="stageCallout" aria-live="polite">
@@ -266,9 +273,9 @@
             <div class="range-card">
               <div><span class="section-kicker">SPOT A PRIVATE ADDRESS</span><h3>Three reserved neighborhoods</h3><p>If an address begins with one of these ranges, it stays inside a private network.</p></div>
               <div class="range-list">
-                <span><strong>10</strong>.0.0.0 – <strong>10</strong>.255.255.255 <small>Large networks</small></span>
-                <span><strong>172.16</strong>.0.0 – <strong>172.31</strong>.255.255 <small>Organizations & cloud</small></span>
-                <span><strong>192.168</strong>.0.0 – <strong>192.168</strong>.255.255 <small>Homes & classrooms</small></span>
+                <span><code><strong>10</strong>.0.0.0 – <strong>10</strong>.255.255.255</code><small>Large networks</small></span>
+                <span><code><strong>172.16</strong>.0.0 – <strong>172.31</strong>.255.255</code><small>Organizations & cloud</small></span>
+                <span><code><strong>192.168</strong>.0.0 – <strong>192.168</strong>.255.255</code><small>Homes & classrooms</small></span>
               </div>
             </div>
             <button class="continue-button" data-next="services">NEXT: MEET THE HELPERS <svg><use href="#i-arrow"></use></svg></button>
@@ -291,6 +298,11 @@
               </div>
               <div class="helper-detail" id="helperDetail">
                 <div class="helper-illustration dhcp-visual">
+                  <svg class="helper-links" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                    <line x1="50" y1="50" x2="24" y2="25"></line>
+                    <line x1="50" y1="50" x2="76" y2="25"></line>
+                    <line x1="50" y1="50" x2="28" y2="80"></line>
+                  </svg>
                   <div class="router-orb"><svg><use href="#i-router"></use></svg><span>ROUTER</span></div>
                   <div class="lease lease-one"><span>IP</span><strong>192.168.1.25</strong><small>Alice’s laptop</small></div>
                   <div class="lease lease-two"><span>GW</span><strong>192.168.1.1</strong><small>Default gateway</small></div>
