@@ -63,14 +63,49 @@ function navigate(section) {
     item.classList.toggle('completed', !isActive && state.visited.has(item.dataset.section));
   });
   $('#breadcrumbCurrent').textContent = $(`#section-${section}`).dataset.title;
-  $('#sidebar').classList.remove('open');
+  if (window.matchMedia('(max-width: 800px)').matches) setSidebarOpen(false);
   window.scrollTo({ top: 0, behavior: 'smooth' });
   updateProgress();
 }
 
 $$('.nav-item').forEach(button => button.addEventListener('click', () => navigate(button.dataset.section)));
 $$('.continue-button').forEach(button => button.addEventListener('click', () => navigate(button.dataset.next)));
-$('#menuButton').addEventListener('click', () => $('#sidebar').classList.toggle('open'));
+
+const sidebarMedia = window.matchMedia('(max-width: 800px)');
+const appShell = $('.app-shell');
+const sidebar = $('#sidebar');
+const menuButton = $('#menuButton');
+
+function isSidebarOpen() {
+  return sidebarMedia.matches
+    ? sidebar.classList.contains('open')
+    : !appShell.classList.contains('sidebar-collapsed');
+}
+
+function updateSidebarControls() {
+  const isOpen = isSidebarOpen();
+  menuButton.setAttribute('aria-expanded', String(isOpen));
+  menuButton.setAttribute('aria-label', isOpen ? 'Close navigation' : 'Open navigation');
+}
+
+function setSidebarOpen(shouldOpen) {
+  if (sidebarMedia.matches) {
+    sidebar.classList.toggle('open', shouldOpen);
+  } else {
+    appShell.classList.toggle('sidebar-collapsed', !shouldOpen);
+  }
+  updateSidebarControls();
+}
+
+menuButton.addEventListener('click', () => setSidebarOpen(!isSidebarOpen()));
+$('#sidebarClose').addEventListener('click', () => {
+  setSidebarOpen(false);
+  menuButton.focus();
+});
+sidebarMedia.addEventListener('change', () => {
+  sidebar.classList.remove('open');
+  updateSidebarControls();
+});
 $('#soundToggle').addEventListener('click', event => {
   state.sound = !state.sound;
   event.currentTarget.classList.toggle('muted', !state.sound);
@@ -492,7 +527,7 @@ $('#restartLesson').addEventListener('click', () => {
 
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape') {
-    $('#sidebar').classList.remove('open');
+    if (isSidebarOpen()) setSidebarOpen(false);
     $('#tooltipCard').classList.remove('visible');
   }
 });
@@ -500,3 +535,4 @@ document.addEventListener('keydown', event => {
 const initialSection = window.location.hash.slice(1);
 if (document.getElementById(`section-${initialSection}`)) navigate(initialSection);
 else updateProgress();
+updateSidebarControls();

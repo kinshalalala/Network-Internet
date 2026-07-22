@@ -26,11 +26,15 @@ button { color: inherit; }
 svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
 .app-shell { min-height: 100vh; }
-.sidebar { position: fixed; inset: 0 auto 0 0; width: 272px; background: var(--navy); color: #fff; padding: 34px 24px 26px; display: flex; flex-direction: column; z-index: 50; }
+.sidebar { position: fixed; inset: 0 auto 0 0; width: 272px; background: var(--navy); color: #fff; padding: 34px 24px 26px; display: flex; flex-direction: column; z-index: 50; transition: transform .25s ease; }
+.sidebar-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .brand { display: flex; align-items: center; gap: 11px; color: #fff; text-decoration: none; font-size: 21px; letter-spacing: -.5px; }
 .brand strong { font-weight: 800; }
 .brand-mark { width: 35px; height: 35px; display: grid; place-items: center; background: var(--orange); border-radius: 9px 9px 9px 2px; transform: rotate(-4deg); }
 .brand-mark svg { width: 21px; height: 21px; transform: rotate(4deg); stroke-width: 2.2; }
+.sidebar-close { flex: 0 0 auto; width: 32px; height: 32px; display: grid; place-items: center; padding: 0; color: #aac0bd; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.12); border-radius: 8px; cursor: pointer; transition: .2s ease; }
+.sidebar-close:hover, .sidebar-close:focus-visible { color: #fff; background: rgba(255,255,255,.1); }
+.sidebar-close svg { width: 15px; height: 15px; transform: rotate(180deg); }
 .course-label { margin: 58px 9px 15px; color: #8ea4a3; font-size: 10px; font-weight: 800; letter-spacing: 1.8px; }
 .lesson-nav { display: grid; gap: 7px; }
 .nav-item { position: relative; width: 100%; display: grid; grid-template-columns: 30px 1fr 16px; gap: 10px; align-items: center; border: 0; background: transparent; color: #aac0bd; padding: 13px 10px; text-align: left; border-radius: 10px; cursor: pointer; transition: .2s ease; }
@@ -53,7 +57,9 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .progress-track span { display: block; width: 0; height: 100%; background: var(--yellow); border-radius: inherit; transition: width .4s ease; }
 .sidebar-progress small { color: #79928f; font-size: 8px; line-height: 1.5; }
 
-.page-wrap { margin-left: 272px; min-width: 0; }
+.page-wrap { margin-left: 272px; min-width: 0; transition: margin-left .25s ease; }
+.app-shell.sidebar-collapsed .sidebar { transform: translateX(-100%); }
+.app-shell.sidebar-collapsed .page-wrap { margin-left: 0; }
 .topbar { height: 70px; display: flex; align-items: center; justify-content: space-between; padding: 0 42px; border-bottom: 1px solid var(--line); background: rgba(245,242,233,.92); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 40; }
 .breadcrumb { display: flex; align-items: center; gap: 11px; font-size: 9px; letter-spacing: 1.2px; }
 .breadcrumb span { color: #7a8988; font-weight: 700; }
@@ -65,7 +71,8 @@ svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width:
 .icon-button { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--line); background: #faf8f2; border-radius: 8px; cursor: pointer; }
 .icon-button svg { width: 17px; color: #56706e; }
 .icon-button.muted svg { opacity: .35; }
-.menu-button { display: none; }
+.menu-button { display: flex; flex-direction: column; justify-content: center; gap: 3px; flex: 0 0 auto; }
+.menu-button span { width: 15px; height: 1px; background: var(--ink); transition: transform .2s ease, opacity .2s ease; }
 
 main { max-width: 1320px; margin: 0 auto; padding: 50px 54px 70px; }
 .content-section { display: none; animation: sectionIn .35s ease both; }
@@ -413,16 +420,24 @@ footer p { margin: 0; }
 }
 
 @media (max-width: 800px) {
-  .sidebar { transform: translateX(-100%); width: 272px; transition: transform .25s ease; box-shadow: 15px 0 40px rgba(0,0,0,.2); }
+  .sidebar { transform: translateX(-100%); width: 272px; box-shadow: 15px 0 40px rgba(0,0,0,.2); }
   .sidebar.open { transform: translateX(0); }
   .page-wrap { margin-left: 0; }
-  .menu-button { display: flex; flex-direction: column; justify-content: center; gap: 3px; }
-  .menu-button span { width: 15px; height: 1px; background: var(--ink); }
   .topbar { padding: 0 20px; }
   main { padding: 34px 20px 50px; }
   .lesson-heading { align-items: flex-start; flex-direction: column; }
   .sim-body { grid-template-columns: 1fr; }
   .network-stage { border-right: 0; border-bottom: 1px solid var(--line); }
+  .device { flex-direction: column; gap: 5px; text-align: center; }
+  .device-copy { display: block; padding: 5px 7px; }
+  .device-copy strong { font-size: 8px; }
+  .device-copy span { margin: 1px 0 0; font-size: 8px; }
+  .device-copy small { display: none; }
+  .router-device { transform: translateX(-50%); }
+  .laptop-device { left: 7%; }
+  .node-device { left: auto; right: 7%; }
+  .you-badge { left: calc(50% - 14px); }
+  .info-hotspot { right: calc(50% - 31px); }
   .control-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
   .choice-stack, .port-toggle { grid-column: span 1; margin-top: 0; }
   .second-step { margin-top: 0; }
@@ -451,8 +466,10 @@ footer p { margin: 0; }
   .network-stage { min-height: 385px; }
   .network-stage::after { width: 94%; height: 400px; bottom: -180px; }
   .sim-body { min-height: 385px; }
-  .router-device { top: 165px; }
-  .laptop-device, .node-device { bottom: 55px; }
+  .router-device { top: 155px; }
+  .laptop-device, .node-device { bottom: 51px; }
+  .laptop-device { left: 4%; }
+  .node-device { right: 4%; }
   .line-internet { top: 115px; left: calc(50% + 8px); }
   .line-laptop { left: 27%; bottom: 82px; }
   .line-node { right: 16%; bottom: 82px; }
